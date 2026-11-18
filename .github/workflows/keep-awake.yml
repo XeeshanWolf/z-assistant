@@ -15,5 +15,5 @@ jobs:
       - name: Ping
         if: env.SUPABASE_ACCESS_TOKEN != ''
         run: |
-          REF=$(curl -sS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" https://api.supabase.com/v1/projects | jq -r '[.[] | select(.name=="z-assistant")][0].id // .[0].id')
+          REF=recoahvvuxyhsduocgnb
           curl -sS --max-time 60 "https://$REF.supabase.co/functions/v1/remind"

@@ -14,7 +14,8 @@ fail() {
 
 projects=$(curl -sS "${AUTH[@]}" "$API/projects") || fail find-project "Could not reach Supabase."
 echo "$projects" | jq -e 'type=="array"' >/dev/null 2>&1 || fail find-project "Supabase refused the token: $(echo "$projects" | head -c 300)"
-REF=$(echo "$projects" | jq -r '[.[] | select(.name=="z-assistant")][0].id // empty')
+REF="${SUPABASE_PROJECT_REF:-}"
+[ -z "$REF" ] && REF=$(echo "$projects" | jq -r '[.[] | select((.name|ascii_downcase|gsub("[^a-z]";""))=="zassistant")][0].id // empty')
 [ -z "$REF" ] && REF=$(echo "$projects" | jq -r 'if length==1 then .[0].id else empty end')
 [ -z "$REF" ] && fail find-project "No Supabase project named z-assistant. Projects found: $(echo "$projects" | jq -c '[.[].name]')"
 echo "Project: $REF"
