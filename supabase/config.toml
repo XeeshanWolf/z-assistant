@@ -1,0 +1,4 @@
+project_id = "z-assistant"
+
+[functions.remind]
+verify_jwt = false

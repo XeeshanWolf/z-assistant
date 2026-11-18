@@ -157,6 +157,51 @@ nav a i:empty{display:none}
 @keyframes pop{from{opacity:0;transform:translateX(-50%) translateY(12px) scale(.96)}}
 .toast button{font-weight:700;color:var(--glow);white-space:nowrap}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* v2: account, reminders, lists, steps */
+#auth{position:fixed;inset:0;z-index:8;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(24px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom));overflow-y:auto}
+#auth[hidden]{display:none}
+#auth::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(55% 32% at 50% 18%,rgba(95,225,255,.18),transparent 70%),radial-gradient(40% 24% at 85% 10%,rgba(169,155,255,.12),transparent 70%)}
+.aw{position:relative;width:100%;max-width:400px;display:flex;flex-direction:column;gap:18px}
+.aw .mark{width:86px;height:86px;border-radius:50%;margin:0 auto;display:grid;place-items:center;font:800 40px/1 var(--display);color:#fff;text-shadow:0 0 22px rgba(95,225,255,.9);background:radial-gradient(circle at 32% 24%,rgba(255,255,255,.2),rgba(255,255,255,.03) 40%,#04080b 75%);box-shadow:0 0 0 3px rgba(95,225,255,.75),0 0 34px rgba(95,225,255,.55),inset 0 0 24px rgba(95,225,255,.25)}
+.aw h1{text-align:center;font-size:22px;line-height:1.2}
+.aw .sub{text-align:center;margin-top:8px}
+.af{border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.af label{font-size:13px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+.af input{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.05);font-size:16px}
+.af input:focus{outline:none;border-color:rgba(95,225,255,.6);box-shadow:0 0 0 4px rgba(95,225,255,.1)}
+.af .btn{width:100%}
+.amsg{font-size:14px;color:var(--should);min-height:0}
+.amsg:empty{display:none}
+.alinks{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.alinks button{font-size:14px;font-weight:600;color:var(--glow)}
+.anote{font-size:12.5px;color:var(--muted);text-align:center;margin:0}
+.lists{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -2px;padding:2px}
+.lists::-webkit-scrollbar{display:none}
+.lists .chip{flex:none}
+.m .ls{color:var(--glow2)}
+.m .rm{color:var(--glow)}
+.steps{display:flex;flex-direction:column;gap:6px}
+.step{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:12px;background:rgba(255,255,255,.04)}
+.step .chk{width:22px;height:22px}
+.step.isdone .chk{background:var(--ok);border-color:var(--ok)}
+.step.isdone span{text-decoration:line-through;color:var(--muted)}
+.step span{flex:1;min-width:0;overflow-wrap:anywhere;font-size:14.5px}
+.step .x{color:var(--muted);font-size:20px;line-height:1;padding:2px 6px}
+.isdone.step .chk::after{content:"";width:8px;height:4px;border:solid #00160d;border-width:0 0 2px 2px;transform:rotate(-45deg) translate(1px,-1px)}
+.addstep{display:flex;gap:8px}
+.addstep input{flex:1}
+.rline{font-size:14px;color:var(--glow);margin:8px 0 0}
+.rline.off{color:var(--muted)}
+.snz{border-radius:16px;padding:12px;border:1px solid rgba(95,225,255,.35);background:rgba(95,225,255,.08);display:flex;flex-direction:column;gap:8px}
+.snz b{font-size:14px}
+.set{display:flex;flex-direction:column;gap:10px;padding:14px 0;border-top:1px solid var(--line)}
+.set:first-child{border-top:0;padding-top:0}
+.set h3{font:700 16px/1.2 var(--display);margin:0}
+.set p{margin:0;color:var(--muted);font-size:14px}
+.set .row2{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.set .row2 input{flex:1;min-width:140px}
+.planbar{display:flex;flex-direction:column;gap:10px}
 </style>
 </head>
 <body>
@@ -164,13 +209,13 @@ nav a i:empty{display:none}
 <div class="app">
   <header class="top">
     <div class="brand">Z Assistant</div>
-    <button class="sync" id="sync" type="button" data-s="ok" aria-label="Backup and settings"><b></b><span id="syncText">Saved on this phone</span></button>
+    <button class="sync" id="sync" type="button" data-s="ok" aria-label="Account and settings"><b></b><span id="syncText">Saved on this phone</span></button>
   </header>
   <main id="main"></main>
   <div class="dock">
     <div class="cap glass">
       <form id="capForm" autocomplete="off">
-        <input id="capText" type="text" placeholder="Dump it here before you forget" aria-label="Capture a task or idea" enterkeyhint="done">
+        <input id="capText" type="text" placeholder="Call Ali tomorrow 5pm #clients" aria-label="Capture a task or idea" enterkeyhint="done">
         <button class="add" type="submit" aria-label="Add">+</button>
       </form>
       <div class="chips">
@@ -183,13 +228,15 @@ nav a i:empty{display:none}
       <a href="#today" data-v="today"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/></svg>Today</a>
       <a href="#inbox" data-v="inbox"><svg viewBox="0 0 24 24"><path d="M3.5 13.5 6 5h12l2.5 8.5V19h-17z"/><path d="M3.5 13.5h5l1 2.5h5l1-2.5h5"/></svg>Inbox<i id="nInbox"></i></a>
       <a href="#plan" data-v="plan"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>Plan</a>
-      <a href="#ideas" data-v="ideas"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M8.5 14.5a6 6 0 1 1 7 0c-.6.5-1 1.2-1 2H9.500c0-.8-.4-1.500-1-2z"/></svg>Ideas</a>
+      <a href="#ideas" data-v="ideas"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M8.5 14.5a6 6 0 1 1 7 0c-.6.5-1 1.2-1 2H9.5c0-.8-.4-1.5-1-2z"/></svg>Ideas</a>
     </nav>
   </div>
 </div>
+<div id="auth" hidden></div>
 <div class="veil" id="veil" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Edit"></div></div>
 <div class="toast" id="toast" hidden role="status"><span id="toastText"></span><button type="button" id="toastBtn"></button></div>
-
+<script src="config.js"></script>
+<script src="lib/supabase.js"></script>
 <script>
 (function(){
 "use strict";
@@ -200,63 +247,295 @@ var ymd=function(d){return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate
 var today=function(){return ymd(new Date())};
 var addDays=function(n){var d=new Date();d.setDate(d.getDate()+n);return ymd(d)};
 var nowHM=function(){var d=new Date();return z(d.getHours())+':'+z(d.getMinutes())};
-var PRI={1:'Must',2:'Should',3:'Later'}, MAX=3, CIRC=540.4, FOCUS_MS=25*60000;
+var PRI={1:'Must',2:'Should',3:'Later'}, MAX=3, CIRC=540.4, FOCUS_MS=25*60000, VERSION='2.0';
+var REPEAT={'':'No repeat',daily:'Daily',weekdays:'Weekdays',weekly:'Weekly',monthly:'Monthly'};
 var calm=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
 function buzz(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
-
-/* ---------- storage ---------- */
-var LS='zassistant.items.v1', LSD='zassistant.deleted.v1', LSF='zassistant.focus.v1';
-var items=new Map(), tomb=[];
-function loadLocal(){try{JSON.parse(localStorage.getItem(LS)||'[]').forEach(function(i){if(i&&i.id)items.set(i.id,i)});tomb=JSON.parse(localStorage.getItem(LSD)||'[]')}catch(e){}}
-function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(Array.from(items.values())));localStorage.setItem(LSD,'[]');setSync('ok')}catch(e){setSync('full');toast('Phone storage is full. Clear finished tasks in Plan.')}}
-function put(it){delete it._l;items.set(it.id,it);saveLocal();render()}
-function del(id){items.delete(id);saveLocal();render()}
-function setSync(s){
-  $('#sync').dataset.s=s;
-  $('#syncText').textContent={ok:'Saved on this phone',full:'Storage full'}[s]||'Saved on this phone';
+function lsGet(k,d){try{var v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
+function lsDel(k){try{localStorage.removeItem(k)}catch(e){}}
+function at(dateStr,hm){var p=(hm||'09:00').split(':');var d=new Date(dateStr+'T12:00');d.setHours(+p[0],+p[1]||0,0,0);return d.getTime()}
+function hmOf(ms){var d=new Date(ms);return z(d.getHours())+':'+z(d.getMinutes())}
+function fmtTime(hm){var p=hm.split(':'),h=+p[0];return ((h+11)%12+1)+':'+p[1]+(h<12?' AM':' PM')}
+function dayWord(dstr){
+  var t=today(),d=Math.round((new Date(dstr+'T12:00')-new Date(t+'T12:00'))/864e5);
+  if(d===0)return 'Today';if(d===1)return 'Tomorrow';if(d===-1)return 'Yesterday';
+  return new Date(dstr+'T12:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
 }
+function fmtWhen(ms){return dayWord(ymd(new Date(ms)))+' '+fmtTime(hmOf(ms))}
+function localInput(ms){var d=new Date(ms);return ymd(d)+'T'+hmOf(ms)}
+function uid(){return 'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+
+/* ---------- cloud ---------- */
+var CFG=window.Z_CONFIG||{};
+var sb=null;
+try{if(CFG.url&&CFG.key&&window.supabase)sb=window.supabase.createClient(CFG.url,CFG.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'zassistant.auth'}})}catch(e){sb=null}
+var CLOUD=!!sb, FN=CLOUD?CFG.url+'/functions/v1/remind':'';
+var user=null, settings={name:'',daily_at:'',tz:''};
+var items=new Map(), dirty={}, seq=0, since='', flushing=false, flushT=0, chan=null, online=navigator.onLine;
+var V1='zassistant.items.v1';
+function key(n){return 'zassistant.u.'+(user?user.id:'local')+'.'+n}
+function loadCache(){
+  items=new Map();
+  var list=CLOUD?lsGet(key('items'),[]):lsGet(V1,[]);
+  list.forEach(function(i){if(i&&i.id)items.set(i.id,i)});
+  dirty=CLOUD?lsGet(key('dirty'),{}):{};since=CLOUD?lsGet(key('since'),''):'';
+  if(CLOUD)settings=Object.assign({name:'',daily_at:'',tz:''},lsGet(key('settings'),{}));
+  else settings=Object.assign({name:'',daily_at:'',tz:''},lsGet('zassistant.local.settings',{}));
+}
+function saveCache(){
+  var ok=CLOUD?lsSet(key('items'),Array.from(items.values()))&&lsSet(key('dirty'),dirty)&&lsSet(key('since'),since):lsSet(V1,Array.from(items.values()));
+  if(!ok)toast('Phone storage is full. Clear finished tasks in Plan.');
+  status();
+}
+function put(it){it.updated=Date.now();items.set(it.id,it);dirty[it.id]=++seq;saveCache();render();flushSoon()}
+function del(id){items.delete(id);dirty[id]='del'+(++seq);saveCache();render();flushSoon()}
+function flushSoon(){clearTimeout(flushT);flushT=setTimeout(flush,500)}
+async function flush(){
+  if(!CLOUD||!user||flushing)return;
+  var ids=Object.keys(dirty);if(!ids.length){status();return}
+  if(!navigator.onLine){status();return}
+  flushing=true;status();
+  var snap={};ids.forEach(function(id){snap[id]=dirty[id]});
+  var rows=ids.map(function(id){
+    var it=items.get(id);
+    if(!it||String(dirty[id]).indexOf('del')===0)return {user_id:user.id,id:id,data:{},remind_at:null,deleted:true};
+    var body={};Object.keys(it).forEach(function(k){if(k!=='_l')body[k]=it[k]});
+    return {user_id:user.id,id:id,data:body,remind_at:it.remindAt&&!it.done?new Date(it.remindAt).toISOString():null,deleted:false};
+  });
+  try{
+    var r=await sb.from('items').upsert(rows,{onConflict:'user_id,id'});
+    if(r.error)throw r.error;
+    ids.forEach(function(id){if(dirty[id]===snap[id])delete dirty[id]});
+    saveCache();
+  }catch(e){
+    console.warn('sync',e);
+    setTimeout(flush,15000);
+  }
+  flushing=false;status();
+  if(Object.keys(dirty).length)flushSoon();
+}
+function mergeRow(r){
+  if(!r||!r.id||dirty[r.id]!==undefined)return false;
+  if(r.deleted){return items.delete(r.id)}
+  var d=Object.assign({},r.data||{},{id:r.id});
+  var cur=items.get(r.id);
+  if(cur&&JSON.stringify(cur)===JSON.stringify(d))return false;
+  items.set(r.id,d);return true;
+}
+async function pull(){
+  if(!CLOUD||!user||!navigator.onLine)return;
+  try{
+    var changed=false,more=true;
+    while(more){
+      var q=sb.from('items').select('id,data,deleted,updated_at').order('updated_at',{ascending:true}).limit(1000);
+      if(since)q=q.gte('updated_at',since);
+      var r=await q;if(r.error)throw r.error;
+      r.data.forEach(function(row){if(mergeRow(row))changed=true});
+      if(r.data.length)since=r.data[r.data.length-1].updated_at;
+      more=r.data.length===1000;
+    }
+    saveCache();if(changed&&!sw&&$('#veil').hidden)render();
+  }catch(e){console.warn('pull',e)}
+  status();
+}
+function live(){
+  if(chan){try{sb.removeChannel(chan)}catch(e){}chan=null}
+  chan=sb.channel('items-'+user.id).on('postgres_changes',{event:'*',schema:'public',table:'items',filter:'user_id=eq.'+user.id},function(p){
+    if(p.new&&mergeRow(p.new)){if(p.new.updated_at>since)since=p.new.updated_at;saveCache();if(!sw&&$('#veil').hidden)render()}
+  }).subscribe();
+}
+async function loadSettings(){
+  try{
+    var r=await sb.from('settings').select('name,daily_at,tz').maybeSingle();
+    if(r.error)throw r.error;
+    if(r.data){settings=Object.assign(settings,r.data);lsSet(key('settings'),settings)}
+    var metaName=user.user_metadata&&user.user_metadata.name;
+    if(!settings.name&&metaName){settings.name=metaName;saveSettings()}
+    else if(!r.data){saveSettings()}
+    render();
+  }catch(e){console.warn('settings',e)}
+}
+async function saveSettings(){
+  settings.tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+  if(!CLOUD){lsSet('zassistant.local.settings',settings);render();return}
+  lsSet(key('settings'),settings);render();
+  try{var r=await sb.from('settings').upsert({user_id:user.id,name:settings.name||null,daily_at:settings.daily_at||null,tz:settings.tz});if(r.error)throw r.error}
+  catch(e){toast('Could not save settings. Check your internet and try again.')}
+}
+function status(){
+  var el=$('#sync'),t=$('#syncText'),n=Object.keys(dirty).length;
+  if(!CLOUD){el.dataset.s='ok';t.textContent='Saved on this phone';return}
+  if(!user){el.dataset.s='slow';t.textContent='Signed out';return}
+  if(!navigator.onLine){el.dataset.s='slow';t.textContent=n?'Offline, '+n+' to sync':'Offline';return}
+  if(flushing||n){el.dataset.s='wait';t.textContent='Syncing';return}
+  el.dataset.s='ok';t.textContent='Synced';
+}
+async function startUser(u){
+  if(user&&user.id===u.id){return}
+  user=u;loadCache();
+  if(!lsGet('zassistant.v1moved.'+u.id,false)){
+    var old=lsGet(V1,[]);
+    old.forEach(function(i){if(i&&i.id&&!items.has(i.id)){items.set(i.id,i);dirty[i.id]=++seq}});
+    lsSet('zassistant.v1moved.'+u.id,true);saveCache();
+  }
+  $('#auth').hidden=true;route();
+  live();pull().then(flush);loadSettings();prefetchVapid();
+}
+function stopUser(){
+  if(chan){try{sb.removeChannel(chan)}catch(e){}chan=null}
+  user=null;items=new Map();dirty={};render();showAuth('in');
+}
+
+/* ---------- login screen ---------- */
+var authMode='in';
+function showAuth(mode,msg){
+  authMode=mode||'in';var A=$('#auth');
+  var f={
+    in:{h:'Welcome back',s:'Sign in to see your tasks on any phone.',body:'<label>Email<input id="aEmail" type="email" autocomplete="username" inputmode="email" required></label><label>Password<input id="aPass" type="password" autocomplete="current-password" required></label><button class="btn shine" type="submit">Sign in</button>',links:'<button type="button" data-m="up">Create account</button><button type="button" data-m="forgot">Forgot password?</button>'},
+    up:{h:'Create your account',s:'Your tasks and ideas are saved to your account, so you never lose them.',body:'<label>Your name<input id="aName" type="text" autocomplete="given-name" required></label><label>Email<input id="aEmail" type="email" autocomplete="username" inputmode="email" required></label><label>Password (at least 6 characters)<input id="aPass" type="password" autocomplete="new-password" minlength="6" required></label><button class="btn shine" type="submit">Create account</button>',links:'<button type="button" data-m="in">I already have an account</button>'},
+    forgot:{h:'Reset your password',s:'We will email you a link to set a new password.',body:'<label>Email<input id="aEmail" type="email" autocomplete="username" inputmode="email" required></label><button class="btn shine" type="submit">Send reset link</button>',links:'<button type="button" data-m="in">Back to sign in</button>'},
+    reset:{h:'Set a new password',s:'Choose a new password for your account.',body:'<label>New password (at least 6 characters)<input id="aPass" type="password" autocomplete="new-password" minlength="6" required></label><button class="btn shine" type="submit">Save new password</button>',links:''}
+  }[authMode];
+  A.innerHTML='<div class="aw"><div class="mark">Z</div><div><h1>'+f.h+'</h1><p class="sub">'+f.s+'</p></div>'+
+    '<form class="af glass" id="aForm" novalidate>'+f.body+'<p class="amsg" id="aMsg" role="alert">'+esc(msg||'')+'</p></form>'+
+    '<div class="alinks">'+f.links+'</div><p class="anote">Free. Your list is private to your account.</p></div>';
+  A.hidden=false;
+  var first=A.querySelector('input');if(first&&!('ontouchstart' in window))first.focus();
+}
+function authErr(e){
+  var m=String(e&&e.message||e||'');
+  if(/invalid login/i.test(m))return 'Wrong email or password.';
+  if(/already registered|already exists/i.test(m))return 'That email already has an account. Sign in instead.';
+  if(/password.*(6|short|least)/i.test(m))return 'Use at least 6 characters for the password.';
+  if(/valid email|invalid.*email|email.*invalid/i.test(m))return 'Enter a valid email address.';
+  if(/rate|too many|security purposes/i.test(m))return 'Too many tries. Wait a minute and try again.';
+  if(/fetch|network/i.test(m))return 'No internet connection. Connect and try again.';
+  return m||'Something went wrong. Try again.';
+}
+$('#auth').addEventListener('click',function(e){var b=e.target.closest('[data-m]');if(b)showAuth(b.dataset.m)});
+$('#auth').addEventListener('submit',async function(e){
+  e.preventDefault();
+  var msg=$('#aMsg'),btn=e.target.querySelector('button[type=submit]'),label=btn.textContent;
+  var email=($('#aEmail')||{}).value,pass=($('#aPass')||{}).value,name=(($('#aName')||{}).value||'').trim();
+  email=(email||'').trim();msg.textContent='';
+  if(authMode!=='reset'&&!/^\S+@\S+\.\S+$/.test(email)){msg.textContent='Enter a valid email address.';return}
+  if((authMode==='up'||authMode==='reset'||authMode==='in')&&(!pass||(authMode!=='in'&&pass.length<6))){msg.textContent=authMode==='in'?'Enter your password.':'Use at least 6 characters for the password.';return}
+  if(authMode==='up'&&!name){msg.textContent='Enter your name.';return}
+  btn.disabled=true;btn.textContent='One moment';
+  try{
+    var r;
+    if(authMode==='in'){r=await sb.auth.signInWithPassword({email:email,password:pass});if(r.error)throw r.error}
+    else if(authMode==='up'){
+      r=await sb.auth.signUp({email:email,password:pass,options:{data:{name:name}}});if(r.error)throw r.error;
+      if(!r.data.session){showAuth('in','Account created. Check your email to confirm it, then sign in.');return}
+      settings.name=name;
+    }else if(authMode==='forgot'){
+      r=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(r.error)throw r.error;
+      showAuth('in','If that email has an account, a reset link is on its way.');return;
+    }else if(authMode==='reset'){
+      r=await sb.auth.updateUser({password:pass});if(r.error)throw r.error;
+      $('#auth').hidden=true;toast('Password changed.');
+      var s=await sb.auth.getSession();if(s.data.session)startUser(s.data.session.user);return;
+    }
+  }catch(x){msg.textContent=authErr(x)}
+  btn.disabled=false;btn.textContent=label;
+});
+
 /* ---------- model ---------- */
 function all(){return Array.from(items.values())}
 function tasks(){return all().filter(function(i){return i.kind==='task'&&!i.done})}
 function byPlan(a,b){return (a.pri||9)-(b.pri||9)||String(a.due||'9').localeCompare(String(b.due||'9'))||String(a.time||'99').localeCompare(String(b.time||'99'))||a.created-b.created}
 function isLate(i){var t=today();return !!i.due&&(i.due<t||(i.due===t&&!!i.time&&i.time<nowHM()))}
-function fmtTime(hm){var p=hm.split(':'),h=+p[0];return ((h+11)%12+1)+':'+p[1]+(h<12?' AM':' PM')}
+function allLists(){var s={};all().forEach(function(i){if(i.list)s[i.list]=1});return Object.keys(s).sort(function(a,b){return a.localeCompare(b)})}
 function dueLabel(i){
   if(!i.due)return '';
   var t=today(),d=Math.round((new Date(i.due+'T12:00')-new Date(t+'T12:00'))/864e5),s;
-  if(d<0)s=(-d)+(d===-1?' day late':' days late');
-  else if(d===0)s='Today';else if(d===1)s='Tomorrow';
-  else s=new Date(i.due+'T12:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+  if(d<0)s=(-d)+(d===-1?' day late':' days late');else s=dayWord(i.due);
   return s+(i.time?' '+fmtTime(i.time):'');
 }
 function meta(i){
   var h='',d=dueLabel(i);
   if(d)h+='<span class="'+(isLate(i)?'late':'')+'">'+esc(d)+'</span>';
   if(i.pri)h+='<span class="p'+i.pri+'">'+PRI[i.pri]+'</span>';
-  if(i.focus&&i.focus<today())h+='<span class="late">Carried over</span>';
+  if(i.remindAt&&!i.done&&i.remindAt>Date.now())h+='<span class="rm">Reminder '+esc(fmtWhen(i.remindAt))+'</span>';
+  if(i.repeat)h+='<span>'+REPEAT[i.repeat]+'</span>';
+  if(i.steps&&i.steps.length){var dn=i.steps.filter(function(s){return s.d}).length;h+='<span>'+dn+'/'+i.steps.length+' steps</span>'}
+  if(i.list)h+='<span class="ls">#'+esc(i.list)+'</span>';
+  if(i.focus&&i.focus<today()&&!i.done)h+='<span class="late">Carried over</span>';
   return h?'<span class="m">'+h+'</span>':'';
 }
 function focusList(){var t=today();return tasks().filter(function(i){return i.focus===t}).sort(function(a,b){return (a.focusAt||0)-(b.focusAt||0)})}
-function doneToday(){var t=today();return all().filter(function(i){return i.kind==='task'&&i.done&&i.doneAt&&ymd(new Date(i.doneAt))===t})}
+function doneToday(){var t=today();return all().filter(function(i){return i.kind==='task'&&(i.done&&i.doneAt&&ymd(new Date(i.doneAt))===t||i.repeat&&i.lastDone&&ymd(new Date(i.lastDone))===t&&!i.done)})}
 function toggleFocus(i){
   var t=today();
   if(i.focus===t){i.focus='';put(i);return}
   if(focusList().length>=MAX){buzz([20,40,20]);toast('Top 3 is full. Finish one or swap one out.');return}
   i.focus=t;i.focusAt=Date.now();buzz(12);put(i);
 }
+function nextDate(base,rep){
+  var d=new Date(base+'T12:00'),t=today(),day=d.getDate(),guard=0;
+  do{
+    if(rep==='daily')d.setDate(d.getDate()+1);
+    else if(rep==='weekdays'){do{d.setDate(d.getDate()+1)}while(d.getDay()===0||d.getDay()===6)}
+    else if(rep==='weekly')d.setDate(d.getDate()+7);
+    else if(rep==='monthly'){var m=d.getMonth()+1;d.setDate(1);d.setMonth(m);var last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();d.setDate(Math.min(day,last))}
+    guard++;
+  }while(ymd(d)<=t&&guard<400);
+  return ymd(d);
+}
 function finish(i,x,y){
   if(F&&F.id===i.id)stopFocus();
-  i.done=true;i.doneAt=Date.now();burst(x,y);buzz([15,30,40]);put(i);
+  burst(x,y);buzz([15,30,40]);
+  if(i.repeat){
+    var before=JSON.parse(JSON.stringify(i));
+    var nd=nextDate(i.due||today(),i.repeat);
+    if(i.remindAt)i.remindAt=at(nd,hmOf(i.remindAt));
+    i.due=nd;i.focus='';i.lastDone=Date.now();
+    if(i.steps)i.steps.forEach(function(s){s.d=false});
+    put(i);
+    toast('Done. Next one '+dayWord(nd)+'.','Undo',function(){items.set(i.id,before);put(before)});
+    return;
+  }
+  i.done=true;i.doneAt=Date.now();put(i);
   toast('Done.','Undo',function(){i.done=false;i.doneAt=0;put(i)});
 }
 function tomorrow(i){
-  var was={due:i.due,focus:i.focus};i.due=addDays(1);i.focus='';put(i);
-  toast('Moved to tomorrow.','Undo',function(){i.due=was.due;i.focus=was.focus;put(i)});
+  var was={due:i.due,focus:i.focus,remindAt:i.remindAt};i.due=addDays(1);i.focus='';
+  if(i.remindAt)i.remindAt=at(i.due,hmOf(i.remindAt));
+  put(i);toast('Moved to tomorrow.','Undo',function(){i.due=was.due;i.focus=was.focus;i.remindAt=was.remindAt;put(i)});
+}
+
+/* ---------- smart capture ---------- */
+var WD=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+function parse(raw,kind){
+  var t=' '+raw+' ',o={list:'',pri:0,due:'',time:'',remindAt:0};
+  t=t.replace(/\s#([\w-]{1,30})(?=\s)/,function(m,l){o.list=l.toLowerCase();return ' '});
+  if(kind!=='task'){o.text=t.trim().replace(/\s+/g,' ');return o}
+  t=t.replace(/\s!([123])?(?=\s)/,function(m,n){o.pri=n?+n:1;return ' '});
+  var tm=null;
+  t=t.replace(/\s(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s?(am|pm)(?=\s)/i,function(m,h,mi,ap){
+    h=+h;mi=mi?+mi:0;if(h<1||h>12||mi>59)return m;
+    if(/pm/i.test(ap)&&h<12)h+=12;if(/am/i.test(ap)&&h===12)h=0;tm=z(h)+':'+z(mi);return ' ';
+  });
+  if(!tm)t=t.replace(/\sat\s+(\d{1,2}):(\d{2})(?=\s)/i,function(m,h,mi){if(+h>23||+mi>59)return m;tm=z(+h)+':'+mi;return ' '});
+  var day='';
+  t=t.replace(/\s(today|tonight|tomorrow|tmrw|tmr)(?=\s)/i,function(m,w){
+    w=w.toLowerCase();if(w==='today')day=today();else if(w==='tonight'){day=today();if(!tm){var nh=new Date().getHours()+1;tm=nh<20?'20:00':(nh<24?z(nh)+':00':'23:30')}}else day=addDays(1);return ' ';
+  });
+  if(!day)t=t.replace(/\s(?:on\s+|next\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)(?=\s)/i,function(m,w){
+    var target=WD.indexOf(w.toLowerCase()),d=new Date(),diff=(target-d.getDay()+7)%7||7;day=addDays(diff);return ' ';
+  });
+  if(tm&&!day)day=(tm>nowHM())?today():addDays(1);
+  if(day){o.due=day;if(tm){o.time=tm;o.remindAt=at(day,tm)}}
+  o.text=t.trim().replace(/\s+/g,' ');
+  if(!o.text)o.text=raw.trim();
+  return o;
 }
 
 /* ---------- focus timer ---------- */
-var F=null;try{F=JSON.parse(localStorage.getItem(LSF)||'null')}catch(e){}
-function saveF(){try{localStorage.setItem(LSF,JSON.stringify(F))}catch(e){}}
+var F=lsGet('zassistant.focus.v1',null);
+function saveF(){lsSet('zassistant.focus.v1',F)}
 function startFocus(id){F={id:id,end:Date.now()+FOCUS_MS};saveF();buzz(20);render()}
 function stopFocus(){F=null;saveF()}
 function orbState(){
@@ -297,7 +576,7 @@ function step(){
 }
 
 /* ---------- views ---------- */
-var view='today', q='';
+var view='today', q='', pq='', plist='';
 function row(i){
   var on=i.focus===today();
   return '<li class="row p'+(i.pri||0)+(i.done?' isdone':'')+'" data-id="'+esc(i.id)+'">'+
@@ -312,8 +591,10 @@ function vToday(){
   var t=today(),f=focusList(),now=f[0],dt=doneToday();
   var due=tasks().filter(function(i){return i.focus!==t&&((i.due&&i.due<=t)||(i.focus&&i.focus<t))}).sort(byPlan);
   var inbox=tasks().filter(function(i){return !i.pri&&!i.due&&!i.focus}).length;
+  var soon=tasks().filter(function(i){return i.remindAt&&i.remindAt>Date.now()&&i.remindAt-Date.now()<864e5&&i.focus!==t&&!(i.due&&i.due<=t)}).sort(function(a,b){return a.remindAt-b.remindAt});
   var d=new Date(),hr=d.getHours(),hi=hr<5?'Still up':hr<12?'Good morning':hr<17?'Good afternoon':'Good evening',o=orbState(),h='';
-  h+='<section class="hero"><div class="hello"><h1>'+hi+', Zee</h1><p class="sub">'+d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})+'</p></div>'+
+  var nm=(settings.name||'').trim();
+  h+='<section class="hero"><div class="hello"><h1>'+hi+(nm?', '+esc(nm):'')+'</h1><p class="sub">'+d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})+'</p></div>'+
      '<div class="orb'+(o.run?' run':'')+'" id="orb"><svg viewBox="0 0 208 208" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#5FE1FF"/><stop offset="1" stop-color="#A99BFF"/></linearGradient></defs>'+
      '<circle class="trk" cx="104" cy="104" r="86"/><circle class="arc" id="orbArc" cx="104" cy="104" r="86" style="stroke-dashoffset:'+(CIRC*(1-o.p))+'"/></svg>'+
      '<div class="in"><div class="big'+(o.sm?' sm':'')+'" id="orbBig">'+o.big+'</div><div class="lab" id="orbLab">'+o.lab+'</div></div></div></section>';
@@ -325,11 +606,12 @@ function vToday(){
        '<button class="btn" data-act="'+(running?'stopfocus':'startfocus')+'">'+(running?'Stop timer':'Focus 25 min')+'</button><button class="btn" data-act="skip">Not now</button></div></section>';
   }else{
     h+='<section class="now glass empty"><div class="t">'+(tasks().length?'Pick your top 3 for today':'Nothing picked yet')+'</div>'+
-       '<p>'+(tasks().length?'Tap Top 3 on the tasks that matter most. The first one becomes your one job.':'Type anything in the box below. Tasks land in your Inbox, ideas in Ideas.')+'</p></section>';
+       '<p>'+(tasks().length?'Tap Top 3 on the tasks that matter most. The first one becomes your one job.':'Type anything in the box below, like "Call Ali tomorrow 5pm". Times you type become reminders.')+'</p></section>';
   }
   if(f.length>1)h+='<section><h2><span>Up next</span><span>'+f.length+' of '+MAX+' slots</span></h2><ul>'+f.slice(1).map(row).join('')+'</ul></section>';
   if(due.length)h+='<section><h2><span>Due or overdue</span><span>'+due.length+'</span></h2><ul>'+due.map(row).join('')+'</ul></section>';
-  if(f.length>1||due.length)h+='<p class="swipetip">Swipe right to finish, left for tomorrow</p>';
+  if(soon.length)h+='<section><h2><span>Reminders in the next 24 hours</span><span>'+soon.length+'</span></h2><ul>'+soon.map(row).join('')+'</ul></section>';
+  if(f.length>1||due.length||soon.length)h+='<p class="swipetip">Swipe right to finish, left for tomorrow</p>';
   if(inbox)h+='<a class="nudge glass" href="#inbox"><span>'+inbox+(inbox===1?' thing is':' things are')+' waiting to be sorted</span><b>Sort inbox</b></a>';
   if(dt.length)h+='<section><h2><span>Done today</span><span>'+dt.length+'</span></h2><ul>'+dt.map(row).join('')+'</ul></section>';
   return h;
@@ -339,14 +621,20 @@ function vInbox(){
   var h='<div><h1>Inbox</h1><p class="sub">Everything you dumped. Give each one a priority and it leaves this list.</p></div>';
   if(!a.length)return h+'<p class="hint">Inbox is clear. New tasks you add below show up here until you sort them.</p>';
   return h+'<ul>'+a.map(function(i){
-    return '<li class="row" data-id="'+esc(i.id)+'"><div class="card col"><button data-act="edit"><span class="t">'+esc(i.text)+'</span></button>'+
+    return '<li class="row" data-id="'+esc(i.id)+'"><div class="card col"><button data-act="edit"><span class="t">'+esc(i.text)+'</span>'+meta(i)+'</button>'+
       '<div class="tri"><button data-act="pri" data-p="1">Must</button><button data-act="pri" data-p="2">Should</button><button data-act="pri" data-p="3">Later</button>'+
       '<button data-act="today">Today</button><button data-act="toidea">It is an idea</button></div></div></li>';
   }).join('')+'</ul>';
 }
 function vPlan(){
-  var a=tasks().sort(byPlan),h='<div><h1>Plan</h1><p class="sub">Every open task, most important first.</p></div>';
-  if(!a.length)h+='<p class="hint">No open tasks. Add one below.</p>';
+  var ls=allLists();if(plist&&ls.indexOf(plist)<0)plist='';
+  var s=pq.trim().toLowerCase();
+  var a=tasks().filter(function(i){return (!plist||i.list===plist)&&(!s||(i.text+' '+(i.note||'')+' '+(i.list||'')+' '+(i.steps||[]).map(function(x){return x.t}).join(' ')).toLowerCase().indexOf(s)>-1)}).sort(byPlan);
+  var h='<div><h1>Plan</h1><p class="sub">Every open task, most important first.</p></div><div class="planbar">';
+  h+='<input class="search" id="planSearch" type="search" placeholder="Search tasks" aria-label="Search tasks" value="'+esc(pq)+'">';
+  if(ls.length)h+='<div class="lists" role="group" aria-label="Filter by list"><button class="chip" data-act="plist" data-l="" aria-pressed="'+(!plist)+'">All</button>'+ls.map(function(l){return '<button class="chip" data-act="plist" data-l="'+esc(l)+'" aria-pressed="'+(plist===l)+'">#'+esc(l)+'</button>'}).join('')+'</div>';
+  h+='</div>';
+  if(!a.length)h+='<p class="hint">'+(s||plist?'Nothing matches that.':'No open tasks. Add one below.')+'</p>';
   [[1,'Must do'],[2,'Should do'],[3,'Later'],[0,'Not sorted yet']].forEach(function(g){
     var l=a.filter(function(i){return (i.pri||0)===g[0]});
     if(l.length)h+='<section><h2><span>'+g[1]+'</span><span>'+l.length+'</span></h2><ul>'+l.map(row).join('')+'</ul></section>';
@@ -357,14 +645,14 @@ function vPlan(){
 }
 function vIdeas(){
   var a=all().filter(function(i){return i.kind==='idea'}).sort(function(x,y){return y.created-x.created});
-  var s=q.trim().toLowerCase(),l=s?a.filter(function(i){return (i.text+' '+(i.note||'')).toLowerCase().indexOf(s)>-1}):a;
+  var s=q.trim().toLowerCase(),l=s?a.filter(function(i){return (i.text+' '+(i.note||'')+' '+(i.list||'')).toLowerCase().indexOf(s)>-1}):a;
   var h='<div><h1>Ideas</h1><p class="sub">'+a.length+' saved. Nothing here is a to-do until you make it one.</p></div>';
   if(a.length>4)h+='<input class="search" id="ideaSearch" type="search" placeholder="Search ideas" aria-label="Search ideas" value="'+esc(q)+'">';
   if(!a.length)return h+'<p class="hint">Switch the box below to Idea and write it down before it is gone.</p>';
   if(!l.length)return h+'<p class="hint">No idea matches that search.</p>';
   return h+'<ul>'+l.map(function(i){
     return '<li><button class="idea glass" data-id="'+esc(i.id)+'" data-act="edit"><span class="t">'+esc(i.text)+'</span>'+(i.note?'<div class="n">'+esc(i.note)+'</div>':'')+
-      '<span class="m" style="margin-top:5px"><span>'+new Date(i.created).toLocaleDateString(undefined,{month:'short',day:'numeric'})+'</span></span></button></li>';
+      '<span class="m" style="margin-top:5px"><span>'+new Date(i.created).toLocaleDateString(undefined,{month:'short',day:'numeric'})+'</span>'+(i.list?'<span class="ls">#'+esc(i.list)+'</span>':'')+'</span></button></li>';
   }).join('')+'</ul>';
 }
 function render(){
@@ -376,23 +664,31 @@ function render(){
   var n=tasks().filter(function(i){return !i.pri&&!i.due&&!i.focus}).length;$('#nInbox').textContent=n||'';
 }
 function route(){
-  var v=location.hash.slice(1);view=({today:1,inbox:1,plan:1,ideas:1}[v])?v:'today';
+  var v=location.hash.slice(1);
+  if(v.indexOf('task-')===0){
+    var id=v.slice(5);view='today';history.replaceState(null,'',location.pathname+location.search+'#today');
+    render();if(items.has(id))openSheet(id,true);return;
+  }
+  view=({today:1,inbox:1,plan:1,ideas:1}[v])?v:'today';
   setKind(view==='ideas'?'idea':'task');var m=$('#main');m.scrollTop=0;render();
   m.classList.remove('swap');void m.offsetWidth;m.classList.add('swap');
 }
 
 /* ---------- capture ---------- */
 var capKind='task',capToday=false;
-function setKind(k){capKind=k;$('#kTask').setAttribute('aria-pressed',k==='task');$('#kIdea').setAttribute('aria-pressed',k==='idea');$('#kToday').hidden=k==='idea'}
+function setKind(k){capKind=k;$('#kTask').setAttribute('aria-pressed',k==='task');$('#kIdea').setAttribute('aria-pressed',k==='idea');$('#kToday').hidden=k==='idea';$('#capText').placeholder=k==='idea'?'Reel idea: night drone over Charminar #hyd':'Call Ali tomorrow 5pm #clients'}
 $('#kTask').onclick=function(){setKind('task')};
 $('#kIdea').onclick=function(){setKind('idea')};
 $('#kToday').onclick=function(){capToday=!capToday;this.setAttribute('aria-pressed',capToday)};
 $('#capForm').addEventListener('submit',function(e){
   e.preventDefault();
-  var inp=$('#capText'),text=inp.value.trim();if(!text)return;
-  var it={id:'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,7),kind:capKind,text:text,note:'',pri:0,due:(capKind==='task'&&capToday)?today():'',time:'',focus:'',focusAt:0,done:false,doneAt:0,created:Date.now()};
+  var inp=$('#capText'),raw=inp.value.trim();if(!raw)return;
+  var p=parse(raw,capKind);
+  var it={id:uid(),kind:capKind,text:p.text,note:'',pri:p.pri,due:p.due||((capKind==='task'&&capToday)?today():''),time:p.time,focus:'',focusAt:0,done:false,doneAt:0,created:Date.now(),list:p.list,steps:[],repeat:'',remindAt:p.remindAt};
   inp.value='';buzz(10);put(it);
-  toast(capKind==='idea'?'Saved to Ideas.':(it.due?'Added for today.':'Saved to Inbox.'),'Add details',function(){openSheet(it.id)});
+  var bits=[];if(it.remindAt)bits.push('reminder '+fmtWhen(it.remindAt));else if(it.due)bits.push(dayWord(it.due));if(it.list)bits.push('#'+it.list);if(it.pri)bits.push(PRI[it.pri]);
+  toast((capKind==='idea'?'Saved to Ideas':(it.due||it.pri?'Saved':'Saved to Inbox'))+(bits.length?': '+bits.join(', '):'')+'.','Edit',function(){openSheet(it.id)});
+  if(it.remindAt)nudgePush();
 });
 
 /* ---------- swipe ---------- */
@@ -425,12 +721,14 @@ var clearArmed=0;
 M.addEventListener('click',function(e){
   if(block)return;
   var b=e.target.closest('[data-act]');if(!b)return;
-  var host=b.closest('[data-id]'),it=host?items.get(host.dataset.id):null,act=b.dataset.act;
+  var act=b.dataset.act;
+  if(act==='plist'){plist=b.dataset.l;render();return}
   if(act==='clear'){
     if(Date.now()-clearArmed<4000){all().filter(function(i){return i.kind==='task'&&i.done}).forEach(function(i){del(i.id)});clearArmed=0;toast('Finished tasks cleared.')}
     else{clearArmed=Date.now();b.textContent='Tap again to clear '+b.dataset.n+' for good'}
     return;
   }
+  var host=b.closest('[data-id]'),it=host?items.get(host.dataset.id):null;
   if(!it)return;
   var r=b.getBoundingClientRect();
   if(act==='done')finish(it,r.left+r.width/2,r.top+r.height/2);
@@ -442,17 +740,43 @@ M.addEventListener('click',function(e){
   else if(act==='stopfocus'){stopFocus();render()}
   else if(act==='pri'){it.pri=+b.dataset.p;buzz(10);put(it)}
   else if(act==='today'){it.due=today();buzz(10);put(it)}
-  else if(act==='toidea'){it.kind='idea';put(it);toast('Moved to Ideas.')}
+  else if(act==='toidea'){it.kind='idea';it.remindAt=0;put(it);toast('Moved to Ideas.')}
 });
-M.addEventListener('input',function(e){if(e.target.id==='ideaSearch'){q=e.target.value;render()}});
+M.addEventListener('input',function(e){
+  if(e.target.id==='ideaSearch'){q=e.target.value;render()}
+  else if(e.target.id==='planSearch'){pq=e.target.value;render()}
+});
 
 /* ---------- edit sheet ---------- */
-var draft=null,delArmed=false;
-function chip(g,v,l){return '<button type="button" class="chip" data-g="'+g+'" data-v="'+v+'" aria-pressed="'+(String(draft[g])===String(v))+'">'+l+'</button>'}
-function openSheet(id){
-  var it=items.get(id);if(!it)return;draft=Object.assign({},it);delArmed=false;
-  var task=draft.kind==='task';
+var draft=null,delArmed=false,sheetMode='';
+function chip(g,v,l){return '<button type="button" class="chip" data-g="'+g+'" data-v="'+esc(v)+'" aria-pressed="'+(String(draft[g]||'')===String(v))+'">'+l+'</button>'}
+function remindChips(){
+  var h=new Date().getHours(),c='';
+  c+='<button type="button" class="chip" data-r="60">In 1 hour</button>';
+  if(h<19)c+='<button type="button" class="chip" data-r="tonight">Tonight 8 PM</button>';
+  c+='<button type="button" class="chip" data-r="tom9">Tomorrow 9 AM</button>';
+  if(draft.due&&draft.time)c+='<button type="button" class="chip" data-r="due">At due time</button>';
+  c+='<button type="button" class="chip" data-r="off">No reminder</button>';
+  return c;
+}
+function remindLine(){
+  if(!draft.remindAt)return '<p class="rline off" id="rLine">No reminder set.</p>';
+  var past=draft.remindAt<=Date.now();
+  return '<p class="rline'+(past?' off':'')+'" id="rLine">'+(past?'Reminded you ':'Reminds you ')+esc(fmtWhen(draft.remindAt))+'.'+(pushState()==='on'||past?'':' Turn on notifications in Settings so your phone can buzz.')+'</p>';
+}
+function stepsHtml(){
+  return (draft.steps||[]).map(function(s,n){return '<div class="step'+(s.d?' isdone':'')+'"><button type="button" class="chk" data-s="'+n+'" aria-label="'+(s.d?'Mark step not done':'Mark step done')+'"></button><span>'+esc(s.t)+'</span><button type="button" class="x" data-sx="'+n+'" aria-label="Remove step">&times;</button></div>'}).join('');
+}
+function listChips(){
+  var ls=allLists();if(draft.list&&ls.indexOf(draft.list)<0)ls.push(draft.list);
+  return chip('list','','No list')+ls.map(function(l){return chip('list',l,'#'+esc(l))}).join('');
+}
+function openSheet(id,fromNote){
+  var it=items.get(id);if(!it)return;
+  draft=JSON.parse(JSON.stringify(it));draft.steps=draft.steps||[];delArmed=false;sheetMode='edit';
+  var task=draft.kind==='task',past=draft.remindAt&&draft.remindAt<=Date.now()&&!draft.done;
   $('#sheet').innerHTML=
+    (past||fromNote?'<div class="snz"><b>Snooze this reminder</b><div class="seg"><button type="button" class="chip" data-snz="10">10 minutes</button><button type="button" class="chip" data-snz="60">1 hour</button><button type="button" class="chip" data-snz="tom9">Tomorrow 9 AM</button></div></div>':'')+
     '<div><label for="fText">'+(task?'Task':'Idea')+'</label><textarea id="fText" rows="2">'+esc(draft.text)+'</textarea></div>'+
     '<div><label for="fNote">Notes</label><textarea id="fNote" rows="3" placeholder="Links, details, next step">'+esc(draft.note||'')+'</textarea></div>'+
     '<div><span class="lab">Type</span><div class="seg">'+chip('kind','task','Task')+chip('kind','idea','Idea')+'</div></div>'+
@@ -460,64 +784,173 @@ function openSheet(id){
       '<div><span class="lab">Priority</span><div class="seg">'+chip('pri',1,'Must')+chip('pri',2,'Should')+chip('pri',3,'Later')+chip('pri',0,'Not sorted')+'</div></div>'+
       '<div><span class="lab">When</span><div class="seg" style="margin-bottom:8px"><button type="button" class="chip" data-d="0">Today</button><button type="button" class="chip" data-d="1">Tomorrow</button><button type="button" class="chip" data-d="7">Next week</button><button type="button" class="chip" data-d="x">No date</button></div>'+
       '<div class="two"><input id="fDue" type="date" aria-label="Due date" value="'+esc(draft.due||'')+'"><input id="fTime" type="time" aria-label="Due time" value="'+esc(draft.time||'')+'"></div></div>'+
+      '<div><span class="lab">Remind me</span><div class="seg" id="rChips" style="margin-bottom:8px">'+remindChips()+'</div>'+
+      '<input id="fRemind" type="datetime-local" aria-label="Reminder date and time" value="'+(draft.remindAt?localInput(draft.remindAt):'')+'">'+remindLine()+'</div>'+
+      '<div><span class="lab">Repeat</span><div class="seg">'+Object.keys(REPEAT).map(function(k){return chip('repeat',k,REPEAT[k])}).join('')+'</div></div>'+
+      '<div><span class="lab">Steps</span><div class="steps" id="fSteps">'+stepsHtml()+'</div>'+
+      '<div class="addstep" style="margin-top:8px"><input id="fStep" type="text" placeholder="Add a step" aria-label="Add a step" enterkeyhint="done"><button type="button" class="btn" id="fStepAdd">Add</button></div></div>'+
     '</div>'+
+    '<div><span class="lab">List</span><div class="seg" id="fLists" style="margin-bottom:8px">'+listChips()+'</div>'+
+    '<div class="addstep"><input id="fList" type="text" placeholder="New list, like clients or hyd" aria-label="New list name"><button type="button" class="btn" id="fListAdd">Add</button></div></div>'+
     '<div class="acts"><button type="button" class="btn del" id="fDel">Delete</button><span style="display:flex;gap:8px"><button type="button" class="btn" id="fCancel">Cancel</button><button type="button" class="btn shine" id="fSave">Save</button></span></div>';
   $('#veil').hidden=false;
 }
-function closeSheet(){$('#veil').hidden=true;draft=null}
+function closeSheet(){$('#veil').hidden=true;draft=null;sheetMode=''}
+function setRemind(ms){draft.remindAt=ms||0;var i=$('#fRemind');if(i)i.value=ms?localInput(ms):'';var l=$('#rLine');if(l)l.outerHTML=remindLine()}
+function remindFrom(code){
+  if(code==='60'||code==='10')return Date.now()+(+code)*60000;
+  if(code==='tonight')return at(today(),'20:00');
+  if(code==='tom9')return at(addDays(1),'09:00');
+  if(code==='due')return draft.due&&draft.time?at(draft.due,draft.time):0;
+  return 0;
+}
+function addStep(){var i=$('#fStep'),t=i.value.trim();if(!t)return;draft.steps.push({t:t,d:false});i.value='';$('#fSteps').innerHTML=stepsHtml();i.focus()}
+function addList(){var i=$('#fList'),t=i.value.trim().replace(/^#/,'').replace(/\s+/g,'-').toLowerCase().slice(0,30);if(!t)return;draft.list=t;i.value='';$('#fLists').innerHTML=listChips()}
 $('#veil').addEventListener('click',function(e){
   if(e.target===this){closeSheet();return}
-  if(!draft)return;
-  var b=e.target.closest('button');if(!b||!draft)return;
+  if(sheetMode!=='edit'||!draft)return;
+  var b=e.target.closest('button');if(!b)return;
   if(b.dataset.g){
     var g=b.dataset.g;draft[g]=g==='pri'?+b.dataset.v:b.dataset.v;
-    this.querySelectorAll('[data-g="'+g+'"]').forEach(function(x){x.setAttribute('aria-pressed',x===b)});
+    b.parentNode.querySelectorAll('[data-g="'+g+'"]').forEach(function(x){x.setAttribute('aria-pressed',x===b)});
     if(g==='kind')$('#taskOnly').style.display=draft.kind==='task'?'flex':'none';
   }else if(b.dataset.d){
     $('#fDue').value=b.dataset.d==='x'?'':addDays(+b.dataset.d);if(b.dataset.d==='x')$('#fTime').value='';
-  }else if(b.id==='fCancel')closeSheet();
+    draft.due=$('#fDue').value;draft.time=$('#fTime').value;$('#rChips').innerHTML=remindChips();
+  }else if(b.dataset.r){setRemind(remindFrom(b.dataset.r));if(draft.remindAt)nudgePush()}
+  else if(b.dataset.snz){
+    var it=items.get(draft.id);if(!it)return;it.remindAt=remindFrom(b.dataset.snz);put(it);closeSheet();toast('Snoozed until '+fmtWhen(it.remindAt)+'.');
+  }else if(b.dataset.s){var s=draft.steps[+b.dataset.s];s.d=!s.d;$('#fSteps').innerHTML=stepsHtml()}
+  else if(b.dataset.sx){draft.steps.splice(+b.dataset.sx,1);$('#fSteps').innerHTML=stepsHtml()}
+  else if(b.id==='fStepAdd')addStep();
+  else if(b.id==='fListAdd')addList();
+  else if(b.id==='fCancel')closeSheet();
   else if(b.id==='fDel'){
     if(delArmed){var id=draft.id;closeSheet();del(id);toast('Deleted.')}
     else{delArmed=true;b.textContent='Tap again to delete'}
   }else if(b.id==='fSave'){
     var text=$('#fText').value.trim();if(!text){$('#fText').focus();return}
-    var it=items.get(draft.id)||draft;
-    it.text=text;it.note=$('#fNote').value.trim();it.kind=draft.kind;
-    if(it.kind==='task'){it.pri=draft.pri||0;it.due=$('#fDue').value||'';it.time=it.due?($('#fTime').value||''):''}
-    else{it.focus='';it.due='';it.time=''}
-    closeSheet();put(it);
+    var cur=items.get(draft.id)||draft;
+    cur.text=text;cur.note=$('#fNote').value.trim();cur.kind=draft.kind;cur.list=draft.list||'';
+    if(cur.kind==='task'){
+      cur.pri=draft.pri||0;cur.due=$('#fDue').value||'';cur.time=cur.due?($('#fTime').value||''):'';
+      var rv=$('#fRemind').value;cur.remindAt=rv?new Date(rv).getTime():0;
+      cur.repeat=draft.repeat||'';cur.steps=draft.steps||[];
+    }else{cur.focus='';cur.due='';cur.time='';cur.remindAt=0;cur.repeat=''}
+    closeSheet();put(cur);
   }
 });
+$('#veil').addEventListener('change',function(e){
+  if(sheetMode!=='edit'||!draft)return;
+  if(e.target.id==='fRemind'){var v=e.target.value;setRemind(v?new Date(v).getTime():0);if(draft.remindAt)nudgePush()}
+  if(e.target.id==='fDue'||e.target.id==='fTime'){draft.due=$('#fDue').value;draft.time=$('#fTime').value;$('#rChips').innerHTML=remindChips()}
+});
+$('#veil').addEventListener('keydown',function(e){
+  if(e.key!=='Enter')return;
+  if(e.target.id==='fStep'){e.preventDefault();addStep()}
+  if(e.target.id==='fList'){e.preventDefault();addList()}
+});
 
+/* ---------- notifications ---------- */
+var vapidKey=lsGet('zassistant.vapid','');
+function isIOS(){return /iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)}
+function standalone(){return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true}
+function pushSupported(){return 'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window}
+var pushOn=lsGet('zassistant.pushon',false);
+function pushState(){
+  if(!CLOUD)return 'nocloud';
+  if(isIOS()&&!standalone())return 'install';
+  if(!pushSupported())return 'unsupported';
+  if(Notification.permission==='denied')return 'denied';
+  return pushOn&&Notification.permission==='granted'?'on':'off';
+}
+async function prefetchVapid(){
+  if(!CLOUD||vapidKey)return;
+  try{var r=await fetch(FN+'?vapid=1');var j=await r.json();if(j.publicKey){vapidKey=j.publicKey;lsSet('zassistant.vapid',vapidKey)}}catch(e){}
+}
+function b64u(s){var p='='.repeat((4-s.length%4)%4),b=atob((s+p).replace(/-/g,'+').replace(/_/g,'/')),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
+async function enablePush(){
+  var st=pushState();
+  if(st==='install'){toast('On iPhone, add Z Assistant to your Home Screen first, then turn on notifications from the app.');return false}
+  if(st==='unsupported'){toast('This browser cannot show notifications. Try Chrome on Android or the Home Screen app on iPhone.');return false}
+  if(st==='denied'){toast('Notifications are blocked for Z Assistant. Allow them in your phone settings, then try again.');return false}
+  var perm=await Notification.requestPermission();
+  if(perm!=='granted'){toast('Notifications were not allowed.');return false}
+  try{
+    if(!vapidKey)await prefetchVapid();
+    if(!vapidKey)throw new Error('no key');
+    var reg=await navigator.serviceWorker.ready;
+    var sub=await reg.pushManager.getSubscription();
+    if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(vapidKey)});
+    var r=await sb.from('push_subs').upsert({endpoint:sub.endpoint,user_id:user.id,sub:sub.toJSON(),tz:Intl.DateTimeFormat().resolvedOptions().timeZone});
+    if(r.error)throw r.error;
+    pushOn=true;lsSet('zassistant.pushon',true);toast('Notifications are on for this phone.');return true;
+  }catch(e){console.warn(e);toast('Could not turn on notifications. Check your internet and try again.');return false}
+}
+async function testPush(){
+  try{
+    var reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();
+    if(!sub){toast('Turn on notifications first.');return}
+    var r=await fetch(FN,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({test:sub.endpoint})});
+    var j=await r.json();toast(j.sent?'Test sent. It should arrive in a few seconds.':(j.error||'Test did not send.'));
+  }catch(e){toast('Could not send a test. Check your internet.')}
+}
+var nudged=false;
+function nudgePush(){if(nudged||!CLOUD||pushState()==='on')return;nudged=true;setTimeout(function(){toast('To get reminders, turn on notifications.','Turn on',function(){openSettings()})},2600)}
+if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',function(e){
+  if(e.data&&e.data.open){try{var h=new URL(e.data.open).hash;if(h){location.hash=h;route()}}catch(x){}}
+});
 
-/* ---------- backup ---------- */
-var VERSION='1.0';
-function backupText(){return JSON.stringify({app:'z-assistant',version:1,exported:new Date().toISOString(),items:all()})}
-function openBackup(){
-  draft=null;var n=all().length;
-  $('#sheet').innerHTML='<div class="bk">'+
-    '<h3>Backup</h3><p>Your '+n+' item'+(n===1?' is':'s are')+' saved on this phone only. Save a backup now and then, and use it to move everything to another phone.</p>'+
-    '<button type="button" class="btn shine" id="bSave">Save backup file</button>'+
-    '<button type="button" class="btn" id="bCopy">Copy backup as text</button>'+
-    '<h3 style="margin-top:8px">Restore</h3><p>Pick a backup file, or paste backup text below. Items already on this phone are updated, and nothing gets deleted.</p>'+
-    '<label class="btn" for="bFile">Choose backup file</label><input type="file" id="bFile" accept=".json,application/json,text/plain" hidden>'+
-    '<textarea id="bPaste" placeholder="Or paste backup text here" aria-label="Paste backup text"></textarea>'+
-    '<button type="button" class="btn" id="bPasteGo">Restore from pasted text</button>'+
-    '<p class="ver">Z Assistant '+VERSION+'</p>'+
-    '<button type="button" class="btn" id="bClose">Close</button></div>';
-  $('#veil').hidden=false;
+/* ---------- settings sheet ---------- */
+function backupText(){return JSON.stringify({app:'z-assistant',version:2,exported:new Date().toISOString(),items:all()})}
+function openSettings(){
+  draft=null;sheetMode='settings';var n=all().length,ps=pushState(),pending=Object.keys(dirty).length;
+  var h='';
+  h+='<div class="set"><h3>Your name</h3><div class="row2"><input id="sName" type="text" value="'+esc(settings.name||'')+'" placeholder="Your name" aria-label="Your name"><button type="button" class="btn" id="sNameSave">Save</button></div></div>';
+  if(CLOUD&&user){
+    h+='<div class="set"><h3>Account</h3><p>Signed in as '+esc(user.email||'')+'. '+n+' item'+(n===1?'':'s')+(pending?', '+pending+' waiting to sync':', all saved to your account')+'.</p>'+
+      '<div class="row2"><button type="button" class="btn" id="sSync">Sync now</button><button type="button" class="btn del" id="sOut">Sign out</button></div></div>';
+    var pmsg={on:'Notifications are on for this phone.',off:'Turn on notifications so reminders can buzz this phone, even when the app is closed.',install:'On iPhone, open Safari, tap Share, then Add to Home Screen. Open Z Assistant from the Home Screen icon and turn on notifications there.',denied:'Notifications are blocked. Allow them for Z Assistant in your phone settings.',unsupported:'This browser cannot show notifications. Use Chrome on Android, or the Home Screen app on iPhone.'}[ps];
+    h+='<div class="set"><h3>Reminders</h3><p>'+pmsg+'</p><div class="row2">'+
+      (ps==='off'?'<button type="button" class="btn shine" id="sPush">Turn on notifications</button>':'')+
+      (ps==='on'?'<button type="button" class="btn" id="sTest">Send a test</button>':'')+'</div></div>';
+    h+='<div class="set"><h3>Daily plan</h3><p>Get a nudge every morning to pick your top 3.</p><div class="row2"><input id="sDaily" type="time" aria-label="Daily plan time" value="'+esc(settings.daily_at||'')+'"><button type="button" class="btn" id="sDailySave">'+(settings.daily_at?'Update':'Turn on')+'</button>'+(settings.daily_at?'<button type="button" class="btn" id="sDailyOff">Turn off</button>':'')+'</div></div>';
+  }else{
+    h+='<div class="set"><h3>Saved on this phone</h3><p>Cloud sync is not set up yet, so your '+n+' item'+(n===1?' is':'s are')+' only on this phone. Save a backup now and then.</p></div>';
+  }
+  h+='<div class="set bk"><h3>Backup</h3><p>Download a copy of everything, or restore one.</p>'+
+    '<button type="button" class="btn" id="bSave">Save backup file</button><button type="button" class="btn" id="bCopy">Copy backup as text</button>'+
+    '<label class="btn" for="bFile">Restore from a file</label><input type="file" id="bFile" accept=".json,application/json,text/plain" hidden>'+
+    '<textarea id="bPaste" placeholder="Or paste backup text here" aria-label="Paste backup text"></textarea><button type="button" class="btn" id="bPasteGo">Restore from pasted text</button></div>';
+  h+='<div class="set"><p class="ver">Z Assistant '+VERSION+'</p><button type="button" class="btn" id="sClose">Close</button></div>';
+  $('#sheet').innerHTML=h;$('#veil').hidden=false;prefetchVapid();
 }
 function restore(txt){
   var d;try{d=JSON.parse(txt)}catch(e){toast('That is not a Z Assistant backup.');return}
   var list=Array.isArray(d)?d:(d&&d.items);
   if(!Array.isArray(list)){toast('That is not a Z Assistant backup.');return}
-  var c=0;list.forEach(function(i){if(i&&typeof i.id==='string'&&(i.kind==='task'||i.kind==='idea')&&typeof i.text==='string'){delete i._l;items.set(i.id,i);c++}});
-  saveLocal();closeSheet();render();toast(c?'Restored '+c+' item'+(c===1?'':'s')+'.':'No items found in that backup.');
+  var c=0;list.forEach(function(i){if(i&&typeof i.id==='string'&&(i.kind==='task'||i.kind==='idea')&&typeof i.text==='string'){delete i._l;items.set(i.id,i);dirty[i.id]=++seq;c++}});
+  saveCache();closeSheet();render();flushSoon();toast(c?'Restored '+c+' item'+(c===1?'':'s')+'.':'No items found in that backup.');
 }
-$('#sync').onclick=openBackup;
+var outArmed=false;
+$('#sync').onclick=function(){outArmed=false;openSettings()};
 $('#sheet').addEventListener('click',async function(e){
+  if(sheetMode!=='settings')return;
   var b=e.target.closest('button');if(!b)return;
-  if(b.id==='bClose')closeSheet();
+  if(b.id==='sClose')closeSheet();
+  else if(b.id==='sNameSave'){settings.name=$('#sName').value.trim();saveSettings();toast('Name saved.')}
+  else if(b.id==='sSync'){await flush();await pull();toast(Object.keys(dirty).length?'Some changes are still waiting. Check your internet.':'Everything is synced.');openSettings()}
+  else if(b.id==='sOut'){
+    var pend=Object.keys(dirty).length;
+    if(!outArmed){outArmed=true;b.textContent=pend?pend+' changes not synced. Tap again to sign out anyway':'Tap again to sign out';return}
+    var id=user.id;['items','dirty','since','settings'].forEach(function(k){lsDel('zassistant.u.'+id+'.'+k)});
+    lsDel('zassistant.pushon');pushOn=false;
+    closeSheet();await sb.auth.signOut();stopUser();
+  }
+  else if(b.id==='sPush'){await enablePush();openSettings()}
+  else if(b.id==='sTest')testPush();
+  else if(b.id==='sDailySave'){var v=$('#sDaily').value||'09:00';settings.daily_at=v;await saveSettings();toast('Daily plan nudge set for '+fmtTime(v)+'.');if(pushState()!=='on')nudgePush();openSettings()}
+  else if(b.id==='sDailyOff'){settings.daily_at='';await saveSettings();toast('Daily plan nudge turned off.');openSettings()}
   else if(b.id==='bCopy'){try{await navigator.clipboard.writeText(backupText());toast('Backup copied. Paste it somewhere safe.')}catch(x){toast('Copy did not work. Use Save backup file.')}}
   else if(b.id==='bPasteGo')restore($('#bPaste').value);
   else if(b.id==='bSave'){
@@ -535,17 +968,36 @@ $('#sheet').addEventListener('change',function(e){
 var toastT=0,toastFn=null;
 function toast(msg,label,fn){
   var t=$('#toast');$('#toastText').textContent=msg;var b=$('#toastBtn');b.textContent=label||'';b.hidden=!label;toastFn=fn||null;
-  t.hidden=true;void t.offsetWidth;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true},label?5000:3200);
+  t.hidden=true;void t.offsetWidth;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true},label?5500:3400);
 }
 $('#toastBtn').onclick=function(){$('#toast').hidden=true;if(toastFn)toastFn()};
 
 /* ---------- boot ---------- */
-loadLocal();
 window.addEventListener('hashchange',route);
-route();
+window.addEventListener('online',function(){status();flush();pull()});
+window.addEventListener('offline',status);
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&user){pull();flush();if(view==='today'&&$('#veil').hidden)render()}});
+setInterval(function(){
+  var ae=document.activeElement;
+  if(user&&!document.hidden)pull();
+  if(view==='today'&&!sw&&$('#veil').hidden&&!(ae&&/INPUT|TEXTAREA/.test(ae.tagName)))render();
+},60000);
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 if('serviceWorker' in navigator&&location.protocol!=='file:'){navigator.serviceWorker.register('sw.js').catch(function(){})}
-setInterval(function(){var ae=document.activeElement;if(view==='today'&&!sw&&$('#veil').hidden&&!(ae&&/INPUT|TEXTAREA/.test(ae.tagName)))render()},60000);
+if(!CLOUD){loadCache();route();status()}
+else{
+  status();
+  sb.auth.onAuthStateChange(function(ev,session){
+    if(ev==='PASSWORD_RECOVERY'){showAuth('reset');return}
+    if(session&&session.user){if(authMode!=='reset'||$('#auth').hidden)startUser(session.user)}
+    else if(ev==='SIGNED_OUT'){if(user)stopUser()}
+  });
+  sb.auth.getSession().then(function(r){
+    var s=r.data&&r.data.session;
+    if(s&&s.user){if(!(authMode==='reset'&&!$('#auth').hidden))startUser(s.user)}
+    else if($('#auth').hidden&&!user)showAuth('in');
+  }).catch(function(){showAuth('in')});
+}
 })();
 </script>
 </body>
