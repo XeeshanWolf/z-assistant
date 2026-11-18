@@ -1,0 +1,52 @@
+name: Deploy Z Assistant
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SITE_URL: https://xeeshanwolf.github.io/z-assistant/
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare the site
+        run: |
+          mkdir -p _site
+          cp -r index.html sw.js manifest.json lib icons fonts _site/
+          touch _site/.nojekyll
+          echo 'window.Z_CONFIG={};' > _site/config.js
+          jq -n --arg when "$(date -u +%FT%TZ)" '{cloud:"not set up", note:"Add the SUPABASE_ACCESS_TOKEN secret", when:$when}' > _site/deploy-status.json
+
+      - uses: supabase/setup-cli@v1
+        if: env.SUPABASE_ACCESS_TOKEN != ''
+        with:
+          version: latest
+
+      - name: Set up the cloud backend
+        if: env.SUPABASE_ACCESS_TOKEN != ''
+        continue-on-error: true
+        run: bash .github/scripts/backend.sh
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

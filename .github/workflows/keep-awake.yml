@@ -1,0 +1,19 @@
+name: Keep the database awake
+
+# Free Supabase projects pause after a week with no activity. This pings it once a day.
+on:
+  schedule:
+    - cron: '23 14 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+    steps:
+      - name: Ping
+        if: env.SUPABASE_ACCESS_TOKEN != ''
+        run: |
+          REF=$(curl -sS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" https://api.supabase.com/v1/projects | jq -r '[.[] | select(.name=="z-assistant")][0].id // .[0].id')
+          curl -sS --max-time 60 "https://$REF.supabase.co/functions/v1/remind"
