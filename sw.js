@@ -1,6 +1,6 @@
 // Z Assistant offline worker and notification handler.
 // Bump VERSION whenever any file changes so phones pick up the update.
-const VERSION = 'z-assistant-2.0';
+const VERSION = 'z-assistant-2.0.1';
 const SHELL = ['./', 'index.html', 'manifest.json', 'lib/supabase.js', 'fonts/unbounded.woff2', 'fonts/manrope.woff2',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png'];
 // Fetched fresh when online, saved copy when offline.
@@ -25,7 +25,8 @@ self.addEventListener('fetch', e => {
   const name = url.pathname.split('/').pop();
   if (req.mode === 'navigate' || FRESH.includes(name)) {
     const keyName = req.mode === 'navigate' ? 'index.html' : name;
-    e.respondWith(fetch(req).then(res => {
+    // no-cache: always ask the server, so a new app version or new settings are never stuck behind the browser cache.
+    e.respondWith(fetch(url.href, { cache: 'no-cache', credentials: 'same-origin' }).then(res => {
       if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put(keyName, copy)); }
       return res;
     }).catch(() => caches.match(keyName)));

@@ -247,7 +247,7 @@ var ymd=function(d){return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate
 var today=function(){return ymd(new Date())};
 var addDays=function(n){var d=new Date();d.setDate(d.getDate()+n);return ymd(d)};
 var nowHM=function(){var d=new Date();return z(d.getHours())+':'+z(d.getMinutes())};
-var PRI={1:'Must',2:'Should',3:'Later'}, MAX=3, CIRC=540.4, FOCUS_MS=25*60000, VERSION='2.0';
+var PRI={1:'Must',2:'Should',3:'Later'}, MAX=3, CIRC=540.4, FOCUS_MS=25*60000, VERSION='2.0.1';
 var REPEAT={'':'No repeat',daily:'Daily',weekdays:'Weekdays',weekly:'Weekly',monthly:'Monthly'};
 var calm=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
 function buzz(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
