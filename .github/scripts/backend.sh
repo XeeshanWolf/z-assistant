@@ -37,9 +37,9 @@ code=$(curl -sS -o /tmp/a.json -w '%{http_code}' -X PATCH "${AUTH[@]}" "$API/pro
 [[ "$code" =~ ^2 ]] || fail login-settings "$code $(head -c 600 /tmp/a.json)"
 echo "Login settings ready"
 
-if ! supabase functions deploy remind --project-ref "$REF" --no-verify-jwt --use-api > /tmp/f.log 2>&1; then
+if ! supabase functions deploy remind --project-ref "$REF" --no-verify-jwt --use-api --yes > /tmp/f.log 2>&1; then
   cat /tmp/f.log
-  supabase functions deploy remind --project-ref "$REF" --no-verify-jwt > /tmp/f.log 2>&1 || fail reminder-sender "$(tail -c 800 /tmp/f.log)"
+  supabase functions deploy remind --project-ref "$REF" --no-verify-jwt --yes > /tmp/f.log 2>&1 || fail reminder-sender "$(tail -c 800 /tmp/f.log)"
 fi
 cat /tmp/f.log
 echo "Reminder sender deployed"
