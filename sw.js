@@ -1,6 +1,6 @@
 // Z Assistant offline worker and notification handler.
 // Bump VERSION whenever any file changes so phones pick up the update.
-const VERSION = 'z-assistant-2.0.1';
+const VERSION = 'z-assistant-2.1';
 const SHELL = ['./', 'index.html', 'manifest.json', 'lib/supabase.js', 'fonts/unbounded.woff2', 'fonts/manrope.woff2',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png'];
 // Fetched fresh when online, saved copy when offline.

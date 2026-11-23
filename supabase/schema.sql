@@ -24,6 +24,7 @@ create table if not exists public.settings (
   last_daily date,
   updated_at timestamptz not null default now()
 );
+alter table public.settings add column if not exists currency text;
 
 -- Phones that asked for notifications.
 create table if not exists public.push_subs (
